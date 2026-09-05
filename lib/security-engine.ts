@@ -175,13 +175,13 @@ export function evaluateAction(req: EvaluationRequest): EvaluationResult {
     ];
     const securityChecks: SecurityCheckItem[] = [
       { name: "Identity", status: "PASS", detail: "Authenticated user session verified" },
-      { name: "Agent Identity", status: "PASS", detail: "Customer Support Agent (agent-customer-support)" },
+      { name: "Agent Identity", status: "PASS", detail: `${req.agentName} (${req.agentId})` },
       { name: "Resource Sensitivity", status: "FAIL", detail: "Resource .env contains production secrets" },
       { name: "Permission", status: "FAIL", detail: "Agent lacks permission to access credential files" },
       { name: "External Transmission", status: "FAIL", detail: "Outbound exfiltration payload blocked" },
     ];
     const explanation =
-      "The customer support agent has been compromised and is attempting to access sensitive credentials and transmit them to an external destination. Aegis intercepted the request before execution.";
+      `${req.agentName} has attempted to access sensitive credentials and transmit them to an external destination. Aegis intercepted the request before execution.`;
     const interceptedMessage = "Action prevented before execution.";
 
     return {
@@ -201,7 +201,6 @@ export function evaluateAction(req: EvaluationRequest): EvaluationResult {
   // ── 2. Check for Scenario Two: Finance Privilege Abuse ──────────────────────
   // Target: Finance Assistant attempting DELETE on financial invoices/*
   const isFinancePrivilegeAbuse =
-    (agentId.includes("finance") || req.agentName.toLowerCase().includes("finance")) &&
     (action.includes("delete") || combined.includes("delete")) &&
     (resource.includes("invoice") || combined.includes("invoice"));
 
@@ -223,13 +222,13 @@ export function evaluateAction(req: EvaluationRequest): EvaluationResult {
     ];
     const securityChecks: SecurityCheckItem[] = [
       { name: "Identity", status: "PASS", detail: "Authenticated user session verified" },
-      { name: "Agent Identity", status: "PASS", detail: "Finance Assistant (agent-finance-assistant)" },
+      { name: "Agent Identity", status: "PASS", detail: `${req.agentName} (${req.agentId})` },
       { name: "Permission Scope", status: "FAIL", detail: "Allowed: READ | Requested: DELETE" },
       { name: "Action Sensitivity", status: "FAIL", detail: "Destructive operation on financial ledger" },
       { name: "Destructive Operation", status: "FAIL", detail: "Irreversible deletion of invoice records" },
     ];
     const explanation =
-      "The finance assistant has read-only access but attempted to perform a destructive operation on financial records. Aegis blocked the privilege escalation.";
+      `${req.agentName} has read-only access but attempted to perform a destructive operation on financial records. Aegis blocked the privilege escalation.`;
     const interceptedMessage = "Agent attempted an action outside its assigned permissions.";
 
     return {
@@ -249,8 +248,7 @@ export function evaluateAction(req: EvaluationRequest): EvaluationResult {
   // ── 3. Check for Scenario Three: Developer Secret Hunter ────────────────────
   // Target: Developer Assistant attempting to read .env.production outside scope
   const isDeveloperSecretHunter =
-    (agentId.includes("developer") || req.agentName.toLowerCase().includes("developer")) &&
-    (resource.includes(".env.production") || combined.includes(".env.production"));
+    resource.includes(".env.production") || combined.includes(".env.production");
 
   if (isDeveloperSecretHunter) {
     const riskScore = 91;
@@ -270,13 +268,13 @@ export function evaluateAction(req: EvaluationRequest): EvaluationResult {
     ];
     const securityChecks: SecurityCheckItem[] = [
       { name: "Identity", status: "PASS", detail: "Authenticated user session verified" },
-      { name: "Agent Identity", status: "PASS", detail: "Developer Assistant (agent-developer-assistant)" },
+      { name: "Agent Identity", status: "PASS", detail: `${req.agentName} (${req.agentId})` },
       { name: "Resource Sensitivity", status: "FAIL", detail: "Target .env.production contains production secrets" },
       { name: "Scope Validation", status: "FAIL", detail: "Allowed: Source code only | Requested: Production config" },
       { name: "Credential Exposure", status: "FAIL", detail: "Target contains live production API credentials" },
     ];
     const explanation =
-      "The developer assistant attempts to access a sensitive production configuration resource outside its assigned scope. Aegis intercepted the unauthorized read.";
+      `${req.agentName} attempts to access a sensitive production configuration resource outside its assigned scope. Aegis intercepted the unauthorized read.`;
     const interceptedMessage = "Agent attempted to access a sensitive resource outside its assigned scope.";
 
     return {
