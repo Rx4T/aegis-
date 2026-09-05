@@ -189,14 +189,14 @@ export default function DashboardPage() {
       }}>
         <div>
           <h3 style={{ fontSize: "1.05rem", fontWeight: 600, color: "var(--danger)", marginBottom: "6px" }}>
-            ⚡ Simulate an Attack
+            ⚡ AI Agent Attack Lab
           </h3>
           <p style={{ fontSize: "0.875rem", color: "var(--text-secondary)", maxWidth: "500px" }}>
-            Test how Aegis responds to a credential exfiltration attempt. See the full evaluation in real time.
+            Test compromised AI agent threat vectors and see how Aegis intercepts dangerous actions before execution.
           </p>
         </div>
         <Link href="/dashboard/simulator" className="btn-danger" style={{ padding: "12px 24px" }}>
-          Open Simulator →
+          Launch Attack Lab →
         </Link>
       </div>
     </div>
